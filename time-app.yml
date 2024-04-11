@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: k8s-time-app-frontend
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: k8s-time-app-frontend
@@ -40,7 +40,7 @@ kind: Deployment
 metadata:
   name: k8s-time-app-api
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: k8s-time-app-api
@@ -131,7 +131,7 @@ kind: Deployment
 metadata:
   name: k8s-time-app-phpmyadm
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: k8s-time-app-phpmyadm
@@ -153,11 +153,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: k8s-time-app-phpmyadmin
+  name: k8s-time-app-phpmyadm
 spec:
   type: LoadBalancer
   selector:
-    app: k8s-time-app-phpmyadmin
+    app: k8s-time-app-phpmyadm
   ports:
   - port: 8080
     targetPort: 80
