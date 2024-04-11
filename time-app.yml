@@ -1,0 +1,163 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-time-app-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s-time-app-frontend
+  template:
+    metadata:
+      labels:
+        app: k8s-time-app-frontend
+    spec:
+      containers:
+      - name: k8s-time-app-frontend
+        image: maximpilipenko/time-app-frontend-dev
+        env:
+         - name: CHOKIDAR_USEPOLLING
+           value: "true"
+        ports:
+        - containerPort: 3000  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-time-app-frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: k8s-time-app-frontend
+  ports:
+  - port: 3000
+    targetPort: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-time-app-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s-time-app-api
+  template:
+    metadata:
+      labels:
+        app: k8s-time-app-api
+    spec:
+      containers:
+      - name: k8s-time-app-api
+        image: maximpilipenko/time-app-api-dev
+        env:
+        - name: MYSQL_HOST
+          value: mysql
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_USER
+          value: root
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DB
+          value: time_db
+        ports:
+        - containerPort: 5000   
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-time-app-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: k8s-time-app-api
+  ports:
+  - port: 5555
+    targetPort: 5000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: time_db
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data-volume
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data-volume
+        emptyDir: {}
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  type: ClusterIP
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-time-app-phpmyadm
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s-time-app-phpmyadm
+  template:
+    metadata:
+      labels:
+        app: k8s-time-app-phpmyadm
+    spec:
+      containers:
+      - name: k8s-time-app-phpmyadm
+        image: phpmyadmin
+        env:
+          - name: PMA_ARBITRARY
+            value: "1"
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-time-app-phpmyadmin
+spec:
+  type: LoadBalancer
+  selector:
+    app: k8s-time-app-phpmyadmin
+  ports:
+  - port: 8080
+    targetPort: 80
